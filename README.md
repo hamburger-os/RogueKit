@@ -30,17 +30,17 @@
 
 选择直接函数调用、节点信号还是全局事件总线，不应是随意的，而应基于通信双方的耦合关系和通信需求。通过制定明确的协议，可以防止项目在迭代过程中出现架构腐化。
 
-*   **第一层级（内部/高耦合）：直接函数调用**
-    *   **场景**：父节点对其直接子组件进行命令式的控制。例如，玩家节点调用其子节点`HealthComponent`的`take_damage`方法。
-    - **理由**：这是最高效、最直接的通信方式。由于父节点和其组件在逻辑上是紧密耦合的整体，直接调用是完全合理的。
+* **第一层级（内部/高耦合）：直接函数调用**
+    * **场景**：父节点对其直接子组件进行命令式的控制。例如，玩家节点调用其子节点`HealthComponent`的`take_damage`方法。
+    * **理由**：这是最高效、最直接的通信方式。由于父节点和其组件在逻辑上是紧密耦合的整体，直接调用是完全合理的。
 
-*   **第二层级（局部/中耦合）：节点信号**
-    *   **场景**：一个组件需要通知其所有者（父节点）或兄弟节点某个状态发生了变化，但它不应该知道也不关心谁会对此做出反应。例如，`HealthComponent`在生命值耗尽时发出`health_depleted`信号，其父节点（如`Player`或`Enemy`）连接此信号以执行死亡逻辑。
-    - **理由**：这完美地体现了“信号向上，调用向下”的设计思想。它允许组件保持独立和可复用，同时有效地将事件通知给关心它的上层逻辑。
+* **第二层级（局部/中耦合）：节点信号**
+    * **场景**：一个组件需要通知其所有者（父节点）或兄弟节点某个状态发生了变化，但它不应该知道也不关心谁会对此做出反应。例如，`HealthComponent`在生命值耗尽时发出`health_depleted`信号，其父节点（如`Player`或`Enemy`）连接此信号以执行死亡逻辑。
+    * **理由**：这完美地体现了“信号向上，调用向下”的设计思想。它允许组件保持独立和可复用，同时有效地将事件通知给关心它的上层逻辑。
 
-*   **第三层级（全局/低耦合）：全局事件总线**
-    *   **场景**：一个系统需要广播一个重要的、全局性的游戏事件，多个完全不相关的系统可能都需要对此事件做出响应。例如，“玩家升级”（`player_leveled_up`）事件可能会被UI系统、音效系统和成就系统同时监听。
-    - **理由**：事件总线（`Events.gd` Autoload）在此处是理想选择。它允许事件的发布者和订阅者之间完全解耦，任何系统都可以监听这些全局事件，而无需与事件的来源有任何直接联系。
+* **第三层级（全局/低耦合）：全局事件总线**
+    * **场景**：一个系统需要广播一个重要的、全局性的游戏事件，多个完全不相关的系统可能都需要对此事件做出响应。例如，“玩家升级”（`player_leveled_up`）事件可能会被UI系统、音效系统和成就系统同时监听。
+    * **理由**：事件总线（`Events.gd` Autoload）在此处是理想选择。它允许事件的发布者和订阅者之间完全解耦，任何系统都可以监听这些全局事件，而无需与事件的来源有任何直接联系。
 
 为了将这一协议固化为开发者易于遵循的实践指南，特提供下表作为参考：
 
@@ -59,9 +59,9 @@
 项目文件将组织在一个专用的`roguekit`目录中，以方便用户将其作为插件或子模块集成到自己的项目中。在该目录下，所有代码和资源将按功能模块进行组织，而非按文件类型。例如，所有与世界生成相关的逻辑和资源将位于`roguekit/world_gen/`目录下，所有与实体相关的则位于`roguekit/entity/`目录下。这种“按功能聚合”的结构有助于保持模块的内聚性，并减少在不同目录间跳转的频率。
 
 所有GDScript代码将严格遵守Godot社区（特别是GDQuest）推荐的编码风格指南。这包括但不限于：
-*   **代码顺序**：严格遵循`class_name`、`extends`、信号、枚举、常量、导出变量、公共变量、私有变量、内置回调函数、公共方法、私有方法的顺序。
-*   **命名约定**：在Godot 4中，类名（`class_name`）和枚举类型名使用帕斯卡命名法（PascalCase），而文件、函数、变量和信号名使用蛇形命名法（snake_case）。
-*   **静态类型**：所有变量、函数参数和返回值都将使用静态类型提示。尽管在当前版本的GDScript中，静态类型对性能的提升有限，但它极大地增强了代码的可读性、提供了更好的自动补全支持，并能在编码阶段捕获大量潜在的类型错误。
+* **代码顺序**：严格遵循`class_name`、`extends`、信号、枚举、常量、导出变量、公共变量、私有变量、内置回调函数、公共方法、私有方法的顺序。
+* **命名约定**：在Godot 4中，类名（`class_name`）和枚举类型名使用帕斯卡命名法（PascalCase），而文件、函数、变量和信号名使用蛇形命名法（snake_case）。
+* **静态类型**：所有变量、函数参数和返回值都将使用静态类型提示。尽管在当前版本的GDScript中，静态类型对性能的提升有限，但它极大地增强了代码的可读性、提供了更好的自动补全支持，并能在编码阶段捕获大量潜在的类型错误。
 
 ## 2. 世界生成子系统
 
@@ -100,10 +100,10 @@ Roguelike游戏中的地图生成算法多种多样，常见的包括用于生�
 在架构设计中，将数据的逻辑表示与其视觉表示分离是一种重要的最佳实践。对于地图生成而言，`TileMap`节点主要负责图形渲染，而不应承载核心的地图数据和逻辑。生成过程应该首先在一个更简单、更抽象的数据结构上进行操作。
 
 因此，`MapGenerator`的输出将不是一个配置好的`TileMap`节点，而是一个自定义的`MapData` `Resource`对象。这个`MapData`对象是地图的纯数据抽象，它将包含：
-*   一个二维数组，用于表示地图网格的基本布局（例如，`TileType.WALL`或`TileType.FLOOR`）。
-*   一个房间列表，包含每个已识别房间的位置、大小等信息。
-*   走廊路径的集合。
-*   潜在的实体生成点、楼梯位置等特殊标记。
+* 一个二维数组，用于表示地图网格的基本布局（例如，`TileType.WALL`或`TileType.FLOOR`）。
+* 一个房间列表，包含每个已识别房间的位置、大小等信息。
+* 走廊路径的集合。
+* 潜在的实体生成点、楼梯位置等特殊标记。
 
 生成流程完成后，一个独立的`MapBuilder`节点将负责“翻译”这个`MapData`对象。它会读取`MapData`中的信息，并根据预设的`TileSet`将其渲染到实际的`TileMap`或`GridMap`节点上。
 
@@ -124,12 +124,12 @@ Roguelike游戏中的地图生成算法多种多样，常见的包括用于生�
 根据Godot的最佳实践，一个游戏实体可以被设计成一个最小化的场景，其具体的行为和功能通过添加子节点（即组件）的方式来实现。这种组合式的方法取代了僵化的继承体系，提供了极高的灵活性。
 
 **RogueKit** 中的`Entity`将遵循这一蓝图。每个实体都是一个场景，其根节点提供了物理形态（例如`CharacterBody2D`、`Area2D`）。实体的具体能力则由一系列可复用的“组件场景”作为子节点来定义。**RogueKit** 将提供一套标准组件，包括：
-*   `HealthComponent.tscn`: 管理生命值（HP）、承受伤害、死亡事件。
-*   `StatsComponent.tscn`: 持有并管理一个由`Stat`资源构成的字典，处理所有数值属性。
-*   `InventoryComponent.tscn`: 管理物品集合。
-*   `AbilityComponent.tscn`: 管理和执行角色的技能或能力。
-*   `PlayerInputComponent.tscn`: 监听并转换玩家输入为实体动作。
-*   `BasicAIComponent.tscn`: 实现基础的AI行为逻辑，如巡逻、追逐。
+* `HealthComponent.tscn`: 管理生命值（HP）、承受伤害、死亡事件。
+* `StatsComponent.tscn`: 持有并管理一个由`Stat`资源构成的字典，处理所有数值属性。
+* `InventoryComponent.tscn`: 管理物品集合。
+* `AbilityComponent.tscn`: 管理和执行角色的技能或能力。
+* `PlayerInputComponent.tscn`: 监听并转换玩家输入为实体动作。
+* `BasicAIComponent.tscn`: 实现基础的AI行为逻辑，如巡逻、追逐。
 
 **数据链接**：实体场景的根节点脚本将持有一个对其数据定义的引用，这是一个`EntityData`类型的`Resource`（例如`PlayerData.tres`或`GoblinData.tres`）。在`_ready`函数中，根节点脚本会负责将这个数据资源分发给它的各个组件，以完成初始化配置。例如，它会告知`HealthComponent`该实体的最大生命值，或将`StatsComponent`所需的初始属性列表传递给它。
 
@@ -138,22 +138,22 @@ Roguelike游戏中的地图生成算法多种多样，常见的包括用于生�
 一个健壮且灵活的属性（Stat）系统是Roguelike游戏的核心。我们可以构建一个高度模块化的系统，该系统使用`Stat` `Resource`来存储基础值和计算后的当前值，并使用一个独立的`StatModifier` `Object`来处理永久和临时的增益/减益效果。一个`TempStatManager`节点则负责管理所有带时效的修改器。
 
 **RogueKit** 将精确实现这一设计，因为它完美契合了我们的数据驱动哲学：
-*   **`Stat.gd` (extends `Resource`)**: 定义单个属性（如“力量”）。包含`base_value`（基础值）和`current_value`（当前值），并提供添加/移除修改器的方法。当`current_value`发生变化时，会发出一个信号，以便UI等其他系统可以做出响应。
-*   **`StatModifier.gd` (extends `Object`)**: 一个轻量级的数据对象，定义了一个具体的属性修改。它包含修改的`value`（数值）、`type`（类型，如加法、乘法、百分比加成等）以及`duration`（持续时间，0表示永久）。
-*   **`StatsComponent.gd` (extends `Node`)**: 作为一个组件节点附加到实体上。它内部持有一个字典，键是属性名称，值是对应的`Stat`资源实例。该组件的核心职责是管理`StatModifier`的应用和移除，并内置了`TempStatManager`的逻辑，通过`_process`函数来处理所有临时效果的计时和移除。
+* **`Stat.gd` (extends `Resource`)**: 定义单个属性（如“力量”）。包含`base_value`（基础值）和`current_value`（当前值），并提供添加/移除修改器的方法。当`current_value`发生变化时，会发出一个信号，以便UI等其他系统可以做出响应。
+* **`StatModifier.gd` (extends `Object`)**: 一个轻量级的数据对象，定义了一个具体的属性修改。它包含修改的`value`（数值）、`type`（类型，如加法、乘法、百分比加成等）以及`duration`（持续时间，0表示永久）。
+* **`StatsComponent.gd` (extends `Node`)**: 作为一个组件节点附加到实体上。它内部持有一个字典，键是属性名称，值是对应的`Stat`资源实例。该组件的核心职责是管理`StatModifier`的应用和移除，并内置了`TempStatManager`的逻辑，通过`_process`函数来处理所有临时效果的计时和移除。
 
 ### 3.3. `Ability` 系统：数据驱动的效果
 
 Roguelike游戏的能力（Ability）系统通常由大量可叠加的小型效果组成，这些效果可能修改玩家的攻击方式、属性或对敌人施加状态。为了实现这种高度可组合的系统，我们将设计一个完全数据驱动的能力框架。
 
-*   **`AbilityData.gd` (extends `Resource`)**: 定义一个能力。它包含能力的元数据，如`name`、`icon`、`cooldown`、`cost`等，最关键的是，它包含一个`EffectData`资源数组，这个数组定义了能力被触发时实际发生的效果。
-*   **`EffectData.gd` (extends `Resource`)**: 这是一个效果的基类。我们将提供多种具体的、可复用的效果实现，例如：
-    *   `ApplyStatModifierEffect.gd`: 包含一个`StatModifier`，用于对施法者或目标应用属性变化。
-    *   `SpawnSceneEffect.gd`: 用于生成一个指定的场景实例，如发射一枚火球射弹。
-    *   `DamageEffect.gd`: 对目标造成伤害，包含伤害数值和伤害类型等数据。
-    *   `AreaOfEffect.gd`: 在指定位置和范围内，对所有符合条件的目标应用一个或多个子`EffectData`。
+* **`AbilityData.gd` (extends `Resource`)**: 定义一个能力。它包含能力的元数据，如`name`、`icon`、`cooldown`、`cost`等，最关键的是，它包含一个`EffectData`资源数组，这个数组定义了能力被触发时实际发生的效果。
+* **`EffectData.gd` (extends `Resource`)**: 这是一个效果的基类。我们将提供多种具体的、可复用的效果实现，例如：
+    * `ApplyStatModifierEffect.gd`: 包含一个`StatModifier`，用于对施法者或目标应用属性变化。
+    * `SpawnSceneEffect.gd`: 用于生成一个指定的场景实例，如发射一枚火球射弹。
+    * `DamageEffect.gd`: 对目标造成伤害，包含伤害数值和伤害类型等数据。
+    * `AreaOfEffect.gd`: 在指定位置和范围内，对所有符合条件的目标应用一个或多个子`EffectData`。
 
-*   **`AbilityComponent.gd` (extends `Node`)**: 附加到实体上的组件，它持有一个实体当前拥有的`AbilityData`资源列表，并包含执行这些能力效果的逻辑。
+* **`AbilityComponent.gd` (extends `Node`)**: 附加到实体上的组件，它持有一个实体当前拥有的`AbilityData`资源列表，并包含执行这些能力效果的逻辑。
 
 这种设计的精妙之处在于，它通过数据组合实现了复杂的技能协同效应（Synergy）。在传统的硬编码方法中，实现“多重射击”和“火球术”的协同需要编写特定的`if`判断。而在 **RogueKit** 的架构下，这种协同可以自然涌现。“多重射击”能力可能只是一个`ApplyStatModifierEffect`，它将一个`StatModifier`应用到玩家的`ProjectileCount`（射弹数量）属性上，使其`+2`。而“火球术”能力的`SpawnSceneEffect`在执行时，会去读取施法者`StatsComponent`中的`ProjectileCount`属性值，以决定生成多少个火球场景。这样，任何发射射弹的技能都能自动从“多重射击”能力中获益，无需任何额外的代码。这种通过共享数据层（属性系统）来协调效果的架构，是实现Roguelike游戏深度、可组合玩法和涌现式设计的关键。
 
@@ -165,10 +165,10 @@ Roguelike游戏的能力（Ability）系统通常由大量可叠加的小型效�
 
 与实体和能力一样，物品的定义也将采用数据驱动的方式。相比于使用JSON文件，直接使用Godot的`Resource`系统能提供更好的编辑器集成和类型安全。我们将为物品数据建立一个基于继承的`Resource`层级结构：
 
-*   **`BaseItemData.gd` (extends `Resource`)**: 所有物品的基类，包含通用数据，如`id`、`name`、`description`、`icon`（图标）、`max_stack_size`（最大堆叠数量）等。
-*   **`EquipmentData.gd` (extends `BaseItemData`)**: 装备类物品的基类。额外添加`equip_slot`（装备槽位）和一个`StatModifier`数组，这些修改器将在物品被装备时应用到角色身上。
-*   **`WeaponData.gd` (extends `EquipmentData`)**: 武器的特定数据类。增加伤害属性（如`damage_value`、`damage_type`），并可能引用一个`AbilityData`资源来定义其攻击行为。
-*   **`ConsumableData.gd` (extends `BaseItemData`)**: 消耗品的基类。包含一个`EffectData`资源数组，这些效果将在物品被使用时触发。
+* **`BaseItemData.gd` (extends `Resource`)**: 所有物品的基类，包含通用数据，如`id`、`name`、`description`、`icon`（图标）、`max_stack_size`（最大堆叠数量）等。
+* **`EquipmentData.gd` (extends `BaseItemData`)**: 装备类物品的基类。额外添加`equip_slot`（装备槽位）和一个`StatModifier`数组，这些修改器将在物品被装备时应用到角色身上。
+* **`WeaponData.gd` (extends `EquipmentData`)**: 武器的特定数据类。增加伤害属性（如`damage_value`、`damage_type`），并可能引用一个`AbilityData`资源来定义其攻击行为。
+* **`ConsumableData.gd` (extends `BaseItemData`)**: 消耗品的基类。包含一个`EffectData`资源数组，这些效果将在物品被使用时触发。
 
 ### 4.2. `InventoryComponent`：管理物品集合
 
@@ -177,20 +177,20 @@ Roguelike游戏的能力（Ability）系统通常由大量可叠加的小型效�
 **RogueKit** 将提供一个`InventoryComponent.gd`节点作为标准组件。它内部将维护一个数组或字典来表示库存槽位。为了遵循享元模式并节省内存，槽位中存储的将不是`ItemData`资源的完整副本，而是一个轻量级的`InventoryItem` `Object`。这个`InventoryItem`对象将包含一个对`ItemData`资源的引用以及当前的堆叠数量`quantity`。
 
 `InventoryComponent`将提供一套清晰的API供外部调用，例如：
-*   `add_item(item_data: BaseItemData, quantity: int) -> bool`: 尝试向库存中添加指定数量的物品。
-*   `remove_item(slot_index: int, quantity: int) -> bool`: 从指定槽位移除指定数量的物品。
-*   `get_item(slot_index: int) -> InventoryItem`: 获取指定槽位的信息。
+* `add_item(item_data: BaseItemData, quantity: int) -> bool`: 尝试向库存中添加指定数量的物品。
+* `remove_item(slot_index: int, quantity: int) -> bool`: 从指定槽位移除指定数量的物品。
+* `get_item(slot_index: int) -> InventoryItem`: 获取指定槽位的信息。
 
 ### 4.3. 掉落生成管线：`LootTable`资源
 
 战利品掉落是Roguelike游戏奖励循环的核心。我们将设计一个基于`Resource`的、支持权重掉落的系统。
 
-*   **`LootTable.gd` (extends `Resource`)**: 定义一个掉落表。其核心是一个`LootEntry`对象的数组。
-*   **`LootEntry`**: 这是一个内联类或独立的`Object`，用于定义掉落表中的单项。它将包含：
-    *   一个对`BaseItemData`资源的引用。
-    *   一个`weight`（权重）值，用于决定其在掉落池中的相对概率。
-    *   一个数量范围（`min_quantity`, `max_quantity`）。
-*   `LootTable`资源将提供一个核心方法`roll_loot() -> Array[InventoryItem]`。该方法会根据所有`LootEntry`的权重进行一次或多次加权随机抽选，并返回一个包含生成的`InventoryItem`对象的数组。
+* **`LootTable.gd` (extends `Resource`)**: 定义一个掉落表。其核心是一个`LootEntry`对象的数组。
+* **`LootEntry`**: 这是一个内联类或独立的`Object`，用于定义掉落表中的单项。它将包含：
+    * 一个对`BaseItemData`资源的引用。
+    * 一个`weight`（权重）值，用于决定其在掉落池中的相对概率。
+    * 一个数量范围（`min_quantity`, `max_quantity`）。
+* `LootTable`资源将提供一个核心方法`roll_loot() -> Array[InventoryItem]`。该方法会根据所有`LootEntry`的权重进行一次或多次加权随机抽选，并返回一个包含生成的`InventoryItem`对象的数组。
 
 **集成**：为了将掉落系统与实体连接起来，可以创建一个`LootDropComponent.gd`组件。这个组件可以附加到敌人或其他可掉落物品的实体上。它将持有一个对`LootTable`资源的引用，并在监听到其所有者的`health_depleted`信号时，调用`roll_loot()`方法来生成战利品，并将其在游戏世界中实例化。
 
@@ -203,9 +203,9 @@ Roguelike游戏的能力（Ability）系统通常由大量可叠加的小型效�
 一个游戏通常具有多个明确的状态，如主菜单、游戏中、暂停、游戏结束等。有限状态机（Finite State Machine, FSM）是管理这些离散状态转换的经典且稳固的设计模式。
 
 我们将实现一个`GameManager`自动加载单例，其内部逻辑将基于一个有限状态机。这个管理器将负责处理最高级别的游戏流程控制，例如：
-*   开始一次新的游戏运行（`new_run`），这将触发`MapGenerator`开始工作。
-*   处理游戏的暂停（`pause_game`）和恢复（`resume_game`）。
-*   响应玩家死亡事件，并切换到游戏结束状态（`game_over`）。
+* 开始一次新的游戏运行（`new_run`），这将触发`MapGenerator`开始工作。
+* 处理游戏的暂停（`pause_game`）和恢复（`resume_game`）。
+* 响应玩家死亡事件，并切换到游戏结束状态（`game_over`）。
 
 `GameManager`将主要通过全局`Events`事件总线与其他系统进行通信，以保持低耦合。例如，当玩家死亡时，`Player`实体可能会向事件总线发出`player_died`事件，`GameManager`监听到此事件后，便会触发状态转换。
 
@@ -213,12 +213,12 @@ Roguelike游戏的能力（Ability）系统通常由大量可叠加的小型效�
 
 敌人的生成逻辑需要一个管理器来控制生成的时机、位置和类型。生成规则可以数据化地定义，例如通过设定波次、点数系统和允许的敌人类型来控制难度曲线。
 
-*   **`SpawnProfile.gd` (extends `Resource`)**: 这是一个数据资源，用于定义一个关卡或区域中可以生成的实体类型及其概率。它将包含一个加权的`EntityData`资源列表。
-*   **`Spawner.gd`**: 这是一个由`GameManager`管理的系统或节点。它接收一个`SpawnProfile`和一个`MapData`对象，并负责根据生成规则在地图的有效位置上生成敌人。
+* **`SpawnProfile.gd` (extends `Resource`)**: 这是一个数据资源，用于定义一个关卡或区域中可以生成的实体类型及其概率。它将包含一个加权的`EntityData`资源列表。
+* **`Spawner.gd`**: 这是一个由`GameManager`管理的系统或节点。它接收一个`SpawnProfile`和一个`MapData`对象，并负责根据生成规则在地图的有效位置上生成敌人。
 
 在游戏中频繁地实例化和销毁节点（`instantiate()`和`queue_free()`）是一项性能开销很大的操作，尤其是在需要生成大量敌人或射弹的场景中。对象池（Object Pooling）是解决此问题的标准方案。
 
-*   **`ObjectPool.gd`**: 一个自动加载单例，负责管理预先实例化好的场景对象池（如不同类型的敌人、射弹、视觉效果等）。当`Spawner`需要一个敌人时，它会向`ObjectPool`请求一个，而不是直接调用`instantiate()`。当一个敌人“死亡”时，它不会被`queue_free()`销毁，而是被禁用并返回到对象池中以待复用。这个过程需要一个严格的状态重置机制，以确保从池中取出的对象处于干净的初始状态。
+* **`ObjectPool.gd`**: 一个自动加载单例，负责管理预先实例化好的场景对象池（如不同类型的敌人、射弹、视觉效果等）。当`Spawner`需要一个敌人时，它会向`ObjectPool`请求一个，而不是直接调用`instantiate()`。当一个敌人“死亡”时，它不会被`queue_free()`销毁，而是被禁用并返回到对象池中以待复用。这个过程需要一个严格的状态重置机制，以确保从池中取出的对象处于干净的初始状态。
 
 ### 5.3. `SaveManager`：持久化运行与元进度数据
 
@@ -231,8 +231,8 @@ Roguelike游戏的能力（Ability）系统通常由大量可叠加的小型效�
 
 **RogueKit** 的保存系统架构将严格遵循这一区分。`SaveManager`的设计目标是*只*关心持久状态。
 
-*   **`MetaProgressionData.gd` (extends `Resource`)**: 创建一个专门的`Resource`类，用于封装所有需要跨运行持久化的数据。
-*   **`SaveManager.gd`**: 一个自动加载单例，提供`save_game()`和`load_game()`方法。这些方法内部将使用`ResourceSaver.save()`和`ResourceLoader.load()`来将`MetaProgressionData`资源实例序列化到`user://`目录下的一个文件中。
+* **`MetaProgressionData.gd` (extends `Resource`)**: 创建一个专门的`Resource`类，用于封装所有需要跨运行持久化的数据。
+* **`SaveManager.gd`**: 一个自动加载单例，提供`save_game()`和`load_game()`方法。这些方法内部将使用`ResourceSaver.save()`和`ResourceLoader.load()`来将`MetaProgressionData`资源实例序列化到`user://`目录下的一个文件中。
 
 这种设计极大地简化了保存系统的复杂性。它避免了尝试序列化整个动态场景树的陷阱，并与Roguelike“每局都是新开始”的核心玩法保持一致。
 
@@ -244,20 +244,20 @@ Roguelike游戏的能力（Ability）系统通常由大量可叠加的小型效�
 
 `TurnManager`将作为一个核心系统（可能是自动加载单例的一部分，或由`GameManager`管理），负责协调游戏的回合流程。其主要职责是维护一个行动队列，并决定当前轮到哪个实体行动。
 
-*   **行动队列 (Action Queue)**: `TurnManager`将维护一个包含所有可行动实体（玩家、敌人等）的队列。
-*   **能量/行动点系统 (Energy/Action Point System)**: 为了处理不同行动的速度差异（例如，移动比攻击快），本库将实现一个基于能量的系统。
-    *   每个实体每回合会获得一定量的能量（例如，100点）。
-    *   每个行动（如移动、攻击）都有一个能量消耗值。
-    *   实体可以持续行动，直到其能量不足以执行任何行动，此时其回合结束。
-    *   行动队列将根据实体的速度属性（`Speed` Stat）或其他因素动态排序，速度快的实体将更频繁地获得行动机会。
+* **行动队列 (Action Queue)**: `TurnManager`将维护一个包含所有可行动实体（玩家、敌人等）的队列。
+* **能量/行动点系统 (Energy/Action Point System)**: 为了处理不同行动的速度差异（例如，移动比攻击快），本库将实现一个基于能量的系统。
+    * 每个实体每回合会获得一定量的能量（例如，100点）。
+    * 每个行动（如移动、攻击）都有一个能量消耗值。
+    * 实体可以持续行动，直到其能量不足以执行任何行动，此时其回合结束。
+    * 行动队列将根据实体的速度属性（`Speed` Stat）或其他因素动态排序，速度快的实体将更频繁地获得行动机会。
 
 ### 6.2. 命令模式：封装`Action`
 
 为了将“意图”与“执行”解耦，我们将采用命令（Command）设计模式。玩家的输入或AI的决策不会直接调用移动或攻击函数，而是会创建一个`Action`对象。
 
-*   **`BaseAction.gd` (extends `Object`)**: 所有行动的基类，包含一个`execute()`方法和一个`energy_cost`属性。
-*   **具体行动类**: 例如 `MoveAction.gd`、`AttackAction.gd`。这些类将包含执行该行动所需的所有数据（如目标位置、攻击的目标实体）。
-*   **流程**:
+* **`BaseAction.gd` (extends `Object`)**: 所有行动的基类，包含一个`execute()`方法和一个`energy_cost`属性。
+* **具体行动类**: 例如 `MoveAction.gd`、`AttackAction.gd`。这些类将包含执行该行动所需的所有数据（如目标位置、攻击的目标实体）。
+* **流程**:
     1.  当轮到一个实体行动时，`TurnManager`会向该实体请求一个`Action`。
     2.  对于玩家，`PlayerInputComponent`会将输入（如按下方向键）转换为一个`MoveAction`对象。
     3.  对于AI，`AIComponent`会根据其逻辑（见7. AI行为框架）决策并生成一个`Action`对象。
@@ -275,16 +275,16 @@ Roguelike游戏的能力（Ability）系统通常由大量可叠加的小型效�
 虽然有限状态机（FSM）对于简单的AI是可行的，但随着行为复杂度的增加，它很容易变得难以管理。因此，**RogueKit**将采用**行为树（Behavior Trees）** 作为其核心AI设计模式。行为树以其模块化和可组合性而著称，非常适合构建复杂的AI逻辑。
 
 我们将定义一套基础的行为树节点类，全部继承自`BehaviorNode`：
-*   **组合节点 (Composite Nodes)**: 如 `Sequence`（顺序执行，一败则败）和 `Selector`（顺序执行，一成则成）。
-*   **装饰节点 (Decorator Nodes)**: 如 `Inverter`（反转子节点的结果）和 `Repeater`（重复执行子节点）。
-*   **叶节点 (Leaf Nodes / Action Nodes)**: 这是执行具体游戏逻辑的地方，例如 `Action_FindPlayer`、`Action_MoveToTarget`、`Action_Attack`。这些节点最终会生成一个`Action`对象并提交给`TurnManager`。
+* **组合节点 (Composite Nodes)**: 如 `Sequence`（顺序执行，一败则败）和 `Selector`（顺序执行，一成则成）。
+* **装饰节点 (Decorator Nodes)**: 如 `Inverter`（反转子节点的结果）和 `Repeater`（重复执行子节点）。
+* **叶节点 (Leaf Nodes / Action Nodes)**: 这是执行具体游戏逻辑的地方，例如 `Action_FindPlayer`、`Action_MoveToTarget`、`Action_Attack`。这些节点最终会生成一个`Action`对象并提交给`TurnManager`。
 
 ### 7.2. 数据驱动的AI配置：`AIBehaviorProfile`
 
 为了贯彻数据驱动的设计哲学，AI的逻辑本身也应该是可配置的资源。
 
-*   **`AIBehaviorProfile.gd` (extends `Resource`)**: 这个资源将作为行为树的蓝图。在Godot编辑器中，开发者可以通过将不同的`BehaviorNode`资源拖拽并组合成一个树状结构，来定义一个敌人的完整AI逻辑。
-*   **`AIComponent.gd` (extends `Node`)**: 这个组件被附加到实体上，它持有一个对`AIBehaviorProfile`资源的引用。当轮到该实体行动时，`AIComponent`会执行（tick）其行为树，行为树将评估当前的游戏状态（通过访问兄弟组件如`StatsComponent`）并最终返回一个`Action`对象。
+* **`AIBehaviorProfile.gd` (extends `Resource`)**: 这个资源将作为行为树的蓝图。在Godot编辑器中，开发者可以通过将不同的`BehaviorNode`资源拖拽并组合成一个树状结构，来定义一个敌人的完整AI逻辑。
+* **`AIComponent.gd` (extends `Node`)**: 这个组件被附加到实体上，它持有一个对`AIBehaviorProfile`资源的引用。当轮到该实体行动时，`AIComponent`会执行（tick）其行为树，行为树将评估当前的游戏状态（通过访问兄弟组件如`StatsComponent`）并最终返回一个`Action`对象。
 
 这种设计将AI行为的创建从复杂的编码任务转变为可视化的、在编辑器中进行的组装工作，极大地提高了开发效率和灵活性。
 
@@ -295,15 +295,15 @@ Roguelike游戏的能力（Ability）系统通常由大量可叠加的小型效�
 ### 8.1. 预制UI组件
 
 库将提供一系列常用的、可直接使用的UI场景，开发者可以将它们实例化并根据自己的美术风格进行定制。
-*   `HealthBar.tscn`: 一个可以自动响应`health_changed`信号的生命条。
-*   `InventoryWindow.tscn`: 一个功能完整的网格化库存界面，包含物品槽位。
-*   `MessageLog.tscn`: 一个经典的Roguelike文本日志，用于显示战斗信息和游戏事件。
+* `HealthBar.tscn`: 一个可以自动响应`health_changed`信号的生命条。
+* `InventoryWindow.tscn`: 一个功能完整的网格化库存界面，包含物品槽位。
+* `MessageLog.tscn`: 一个经典的Roguelike文本日志，用于显示战斗信息和游戏事件。
 
 ### 8.2. 数据绑定策略
 
 UI与数据的同步是关键。**RogueKit**将主要采用基于信号的数据绑定策略，这是一种松耦合且符合Godot设计哲学的方式。
-*   **信号驱动**: 核心数据对象（如`Stat`资源）在数据变化时会发出信号（例如`stat_adjusted`）。UI组件（如`HealthBar`）的脚本将连接到这些信号，并在接收到信号时更新其显示。
-*   **`DataBinder` 节点 (可选)**: 为了进一步简化UI开发，库可以提供一个通用的`DataBinder`节点。开发者可以将这个节点附加到任何UI控件上，然后在编辑器中配置它：指定要监听的数据源（如玩家的`HealthComponent`的`health`属性）和要更新的目标控件属性（如`ProgressBar`的`value`属性）。`DataBinder`内部会自动处理信号的连接和断开。
+* **信号驱动**: 核心数据对象（如`Stat`资源）在数据变化时会发出信号（例如`stat_adjusted`）。UI组件（如`HealthBar`）的脚本将连接到这些信号，并在接收到信号时更新其显示。
+* **`DataBinder` 节点 (可选)**: 为了进一步简化UI开发，库可以提供一个通用的`DataBinder`节点。开发者可以将这个节点附加到任何UI控件上，然后在编辑器中配置它：指定要监听的数据源（如玩家的`HealthComponent`的`health`属性）和要更新的目标控件属性（如`ProgressBar`的`value`属性）。`DataBinder`内部会自动处理信号的连接和断开。
 
 ## 9. 输入处理与配置
 
@@ -316,8 +316,8 @@ UI与数据的同步是关键。**RogueKit**将主要采用基于信号的数据
 ### 9.2. 输入上下文管理
 
 在游戏的不同状态下，相同的按键可能有不同的功能（例如，在游戏中移动，在菜单中导航）。为了管理这种复杂性，我们将设计一个`InputContextManager`。
-*   **定义上下文**: 开发者可以定义不同的输入上下文，如`GameplayContext`, `MenuContext`, `InventoryContext`。
-*   **切换上下文**: `GameManager`将负责在不同游戏状态之间切换时，激活或禁用相应的输入上下文。例如，当打开库存界面时，`GameplayContext`将被禁用，而`InventoryContext`将被激活。这确保了玩家在查看物品时不会意外地移动角色。
+* **定义上下文**: 开发者可以定义不同的输入上下文，如`GameplayContext`, `MenuContext`, `InventoryContext`。
+* **切换上下文**: `GameManager`将负责在不同游戏状态之间切换时，激活或禁用相应的输入上下文。例如，当打开库存界面时，`GameplayContext`将被禁用，而`InventoryContext`将被激活。这确保了玩家在查看物品时不会意外地移动角色。
 
 ## 10. 视觉与音频反馈系统
 
@@ -330,12 +330,12 @@ UI与数据的同步是关键。**RogueKit**将主要采用基于信号的数据
 ### 10.2. `FXProfile`：数据驱动的效果
 
 为了将效果与事件解耦，我们将使用`Resource`来定义效果配置。
-*   **`FXProfile.gd` (extends `Resource`)**: 这个资源用于将一个事件名称与一个或多个效果关联起来。
-*   **效果类型**: `FXProfile`可以包含对以下资源的引用：
-    *   **VFX**: 一个要实例化的粒子效果或动画场景（`PackedScene`）。
-    *   **SFX**: 一个要播放的音频流（`AudioStream`）。
-    *   **屏幕震动**: 包含强度和持续时间等参数的数据。
-*   **工作流程**: 当一个实体（如敌人）受到伤害时，它只需向全局事件总线发出`entity_took_damage`事件，并附带其位置和伤害类型等信息。`FXManager`监听到该事件后，会查找与该事件关联的`FXProfile`，并在指定位置播放相应的粒子效果和音效。这种设计使得添加或修改反馈效果完全成为数据配置工作，无需更改任何游戏逻辑代码。
+* **`FXProfile.gd` (extends `Resource`)**: 这个资源用于将一个事件名称与一个或多个效果关联起来。
+* **效果类型**: `FXProfile`可以包含对以下资源的引用：
+    * **VFX**: 一个要实例化的粒子效果或动画场景（`PackedScene`）。
+    * **SFX**: 一个要播放的音频流（`AudioStream`）。
+    * **屏幕震动**: 包含强度和持续时间等参数的数据。
+* **工作流程**: 当一个实体（如敌人）受到伤害时，它只需向全局事件总线发出`entity_took_damage`事件，并附带其位置和伤害类型等信息。`FXManager`监听到该事件后，会查找与该事件关联的`FXProfile`，并在指定位置播放相应的粒子效果和音效。这种设计使得添加或修改反馈效果完全成为数据配置工作，无需更改任何游戏逻辑代码。
 
 ## 11. 扩展性指南
 
@@ -344,32 +344,118 @@ UI与数据的同步是关键。**RogueKit**将主要采用基于信号的数据
 ### 11.1. 定义扩展点
 
 **RogueKit** 的设计从一开始就考虑了扩展性。以下是主要的扩展点：
-*   **自定义生成算法**: 创建一个新的GDScript脚本并继承自`GenerationPass` `Resource`，实现自己的`generate(map_data)`方法，即可将其作为一个新的生成通道在`MapGenerationProfile`中使用。
-*   **自定义技能/物品效果**: 继承自`EffectData` `Resource`，实现`execute(target)`方法，即可创建全新的、可被`AbilityData`或`ConsumableData`引用的效果。
-*   **自定义物品类型**: 继承自`BaseItemData`或其子类，以添加新的物品类别和特定属性。
-*   **自定义AI行为**: 继承自`BehaviorNode`，创建新的叶节点（Action）或复合节点，即可在`AIBehaviorProfile`中组装更复杂的AI逻辑。
+* **自定义生成算法**: 创建一个新的GDScript脚本并继承自`GenerationPass` `Resource`，实现自己的`generate(map_data)`方法，即可将其作为一个新的生成通道在`MapGenerationProfile`中使用。
+* **自定义技能/物品效果**: 继承自`EffectData` `Resource`，实现`execute(target)`方法，即可创建全新的、可被`AbilityData`或`ConsumableData`引用的效果。
+* **自定义物品类型**: 继承自`BaseItemData`或其子类，以添加新的物品类别和特定属性。
+* **自定义AI行为**: 继承自`BehaviorNode`，创建新的叶节点（Action）或复合节点，即可在`AIBehaviorProfile`中组装更复杂的AI逻辑。
 
 ### 11.2. API 约定
 
 库将明确区分公共API和内部实现。通常，以单个下划线`_`开头的方法和变量应被视为私有，不应被外部代码直接依赖，因为它们可能在未来的更新中发生变化。所有暴露给编辑器的`@export`变量和公共信号都是稳定API的一部分。
 
-## 12. 测试策略与调试工具
+## 12. 质量保障：测试策略与调试工具
 
-为了确保库的质量和稳定性，并为开发者提供便利，**RogueKit**将包含测试策略和内置的调试工具。
+为了确保库的质量和稳定性，并为开发者提供便利，**RogueKit**将包含周密的测试策略和内置的调试工具。
 
-### 12.1. 测试策略
+### 12.1. 功能测试策略
 
-*   **单元测试**: 对于没有场景依赖的核心逻辑和数据处理部分（例如`LootTable`的权重计算、`Stat`的修改器应用逻辑），我们将使用Godot单元测试框架（如GUT）编写单元测试。这有助于在开发早期捕捉逻辑错误。
-*   **集成测试**: 对于需要多个组件协同工作的场景（例如，一个完整的实体受到伤害并触发死亡信号），将编写集成测试脚本来验证其端到端的功能。
+#### 12.1.1. 测试层级
 
-### 12.2. 内置调试工具
+* **单元测试 (Unit Tests)**: 针对没有场景依赖的核心逻辑和数据处理部分（例如`LootTable`的权重计算、`Stat`的修改器应用逻辑）。我们将使用Godot单元测试框架（如GUT）编写单元测试。这有助于在开发早期捕捉逻辑错误，并确保算法的正确性。
+* **集成测试 (Integration Tests)**: 针对需要多个组件协同工作的场景（例如，一个完整的实体受到伤害并触发死亡信号）。将编写集成测试脚本来验证其端到端的功能，确保组件间的契约（API和信号）按预期工作。
+
+#### 12.1.2. 验收标准示例 (Acceptance Criteria Example)
+
+所有功能的“完成”状态都必须通过明确的验收标准来衡量。我们将采用**Given-When-Then**格式来定义测试用例：
+
+* **示例1：LootTable 权重测试 (单元测试)**
+    * **Given**：一个`LootTable`资源，包含两个条目：物品A（权重=80）和物品B（权重=20）。
+    * **When**：调用`roll_loot()`方法10,000次。
+    * **Then**：物品A的掉落次数应在7800到8200之间（允许2%的容错率），物品B的掉落次数应在1800到2200之间。
+
+* **示例2：HealthComponent 伤害处理 (集成测试)**
+    * **Given**：一个实体场景，其`HealthComponent`的`max_health`初始化为100，当前`health`为100。
+    * **When**：调用实体的`take_damage(25)`方法。
+    * **Then**：实体的`HealthComponent.health`属性应更新为75，并且`health_changed`信号必须被触发一次，其参数为（旧值=100, 新值=75）。
+
+### 12.2. 性能基准测试 (Performance Benchmarking)
+
+为了确保库能够在目标规模下流畅运行，我们将制定并执行性能基准测试。
+
+* **核心指标**:
+    * **帧率 (FPS)**: 游戏运行的平滑度。
+    * **逻辑帧时间 (Process Frame Time)**: 游戏逻辑计算所消耗的时间，用于识别CPU瓶颈。
+    * **内存占用 (Memory Usage)**: 跟踪对象池和资源加载对内存的影响。
+* **基准测试场景**:
+    * **场景1：地图生成压力测试**: 生成不同尺寸（例如 50x50, 100x100, 200x200）的地图，记录生成所需时间。目标：100x100地图生成时间应小于500毫秒。
+    * **场景2：AI实体规模测试**: 在100x100的地图上，分别放置20、50、100个活动AI实体。目标：在100个AI实体活动时，逻辑帧时间不应超过8毫秒（保证60FPS下的稳定裕量）。
+* **工具**: 主要使用Godot内置的性能分析器（Profiler）和监视器（Monitors）进行数据收集。
+
+### 12.3. 内置调试工具
 
 为了帮助开发者诊断问题，**RogueKit**将提供一些可选的调试工具：
-*   **调试覆盖层 (Debug Overlay)**: 一个可以在游戏运行时切换的UI层，用于实时显示关键信息，如玩家坐标、当前游戏状态、AI正在执行的行为树节点等。
-*   **可视化调试**: 提供在游戏世界中绘制调试信息的功能。例如，可以开启一个选项来可视化显示AI的寻路路径、敌人的视野范围或`MapData`的逻辑网格。
-*   **开发者控制台**: 一个简单的游戏内控制台，允许开发者输入命令来执行特定操作，如生成物品、传送到特定位置或切换无敌模式。
 
-## 库的集成与初步使用
+* **调试覆盖层 (Debug Overlay)**: 一个可以在游戏运行时切换的UI层，用于实时显示关键信息，如玩家坐标、当前游戏状态、AI正在执行的行为树节点等。
+* **可视化调试**: 提供在游戏世界中绘制调试信息的功能。例如，可以开启一个选项来可视化显示AI的寻路路径、敌人的视野范围或`MapData`的逻辑网格。
+* **开发者控制台**: 一个简单的游戏内控制台，允许开发者输入命令来执行特定操作，如生成物品、传送到特定位置或切换无敌模式。
+
+## 13. 项目路线图与版本规划
+
+本节定义了**RogueKit**的迭代开发计划，旨在通过分阶段交付来管理复杂性并确保核心功能的稳定性。
+
+### 13.1. v1.0：最小可行产品 (Minimum Viable Product - MVP)
+
+v1.0的目标是提供一个功能完整、可用于构建简单Roguelike游戏的核心框架。优先级最高的（P0）功能包括：
+
+* **核心架构**: 实体-组件系统 (3.1), 属性引擎 (3.2), 基础通信模式 (1.3)。
+* **世界生成**: 基础`MapGenerator` (2.1) 和至少两种生成算法（如BSP树和元胞自动机）(2.2)。
+* **核心玩法循环**: 回合制管理器 (6.1), 命令模式 (6.2), 基础物品与库存 (4.1, 4.2)。
+* **基础AI**: 提供简单的追逐和攻击AI逻辑（可基于FSM或简化的行为树）。
+* **质量保障**: MVP所需的核心单元测试和集成测试。
+
+### 13.2. v1.1：功能增强与AI升级
+
+在v1.0的基础上，v1.1将专注于提升系统的深度和灵活性。
+
+* **高级AI框架**: 完整的、数据驱动的行为树系统 (7.1, 7.2)。
+* **高级内容系统**: 复杂的能力效果系统 (3.3)，支持涌现式设计。
+* **世界填充**: 完善的`SpawnProfile` (5.2) 和战利品表 (4.3)。
+* **UI工具包**: 提供预制的UI组件 (8.1) 和数据绑定方案 (8.2)。
+
+### 13.3. v1.2+：生态系统与元进度
+
+后续版本将关注长期可玩性和开发者体验。
+
+* **元进度系统**: 实现`SaveManager` (5.3)，支持跨运行的数据持久化。
+* **反馈系统**: 完善的视听反馈管理器 (`FXManager`) (10.0)。
+* **文档与示例**: 提供完整的API文档和至少一个小型演示游戏项目。
+* **性能优化**: 根据12.2节的基准测试结果进行深度优化。
+
+## 14. 贡献指南与社区规范
+
+为了确保代码质量的一致性和团队协作的效率，所有贡献者均需遵守以下规范。
+
+### 14.1. Git 工作流
+
+* **分支策略**:
+    * `master`: 始终保持稳定，对应最新的发行版（Release）。禁止直接推送代码到`master`。
+    * `develop`: 开发中的主分支，包含下一版本的所有新功能。所有功能分支都应从此分支创建。
+    * `feature/<feature-name>`: 用于开发新功能的分支。完成后合并回`develop`。
+    * `fix/<issue-number>`: 用于修复Bug的分支。完成后合并回`develop`，必要时挑选（Cherry-pick）到`master`以发布热修复。
+* **提交规范 (Commit Message)**: 强烈建议遵循**Conventional Commits**规范（例如 `feat: add health component`, `fix: correct loot table calculation`）。这有助于自动化生成更新日志。
+
+### 14.2. Pull Request (PR) 流程
+
+1.  **关联Issue**: 每个PR都应关联一个已创建的Issue（问题追踪）。
+2.  **代码审查**: 至少需要一名核心开发者审查并批准后方可合并。
+3.  **自测通过**: 提交者必须确保所有相关的自动化测试（单元测试和集成测试）都能通过。PR描述中应说明如何手动测试该功能。
+4.  **保持小巧**: 避免巨型PR。尽可能将大的功能拆分为多个小的、独立的PR提交。
+
+### 14.3. 社区行为准则
+
+本项目采用标准的贡献者行为准则（Contributor Covenant）。所有参与讨论和贡献的成员都应保持尊重、友好和建设性的态度。
+
+## 15. 库的集成与初步使用
 
 本设计文档描绘了 **RogueKit** ——一个模块化、数据驱动且高度可扩展的Roguelike库的架构蓝图。其核心优势在于：通过**组合**实现模块化，通过**数据驱动**实现灵活性，通过**清晰的架构模式**实现可维护性。
 
