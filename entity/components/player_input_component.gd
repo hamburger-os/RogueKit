@@ -1,22 +1,60 @@
 # 玩家输入组件
 # 监听并转换玩家输入为实体动作（Action）。
+# 实现 "bump to attack" 逻辑：如果移动目标格有敌人，则转换为攻击动作。
 class_name PlayerInputComponent
 extends Node
 
-# 当玩家决定一个行动时发出
-signal action_determined(action)
+const MoveAction = preload("res://lib/roguekit/turn_based/actions/move_action.gd")
+const AttackAction = preload("res://lib/roguekit/turn_based/actions/attack_action.gd")
 
-# 轮到玩家行动时，由 TurnManager 调用
-func process_input():
-	# 这个函数将在回合制循环中被调用。
-	# 在这里，我们将检查输入并发出 action_determined 信号。
-	# 对于一个简单的实现，我们现在只处理方向键。
-	
-	var move_direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	
-	if move_direction != Vector2.ZERO:
-		# 注意：MoveAction 还没有被创建，所以这里只是一个占位符。
-		# 我们将在实现行动系统时回来完善它。
-		var move_action = # MoveAction.new(get_parent(), move_direction)
-		# emit_signal("action_determined", move_action)
-		pass
+signal _action_created(action)
+
+# 依赖注入
+var game_manager: Node
+
+func _ready():
+	set_process(false)
+
+# 由 Entity 的 take_turn() 调用
+func get_action() -> BaseAction:
+	set_process(true)
+	var action = await _action_created
+	set_process(false)
+	return action
+
+func _process(_delta):
+	var direction = Vector2i.ZERO
+	if Input.is_action_just_pressed("ui_up"):
+		direction = Vector2i.UP
+	elif Input.is_action_just_pressed("ui_down"):
+		direction = Vector2i.DOWN
+	elif Input.is_action_just_pressed("ui_left"):
+		direction = Vector2i.LEFT
+	elif Input.is_action_just_pressed("ui_right"):
+		direction = Vector2i.RIGHT
+
+	if direction != Vector2i.ZERO:
+		var owner = get_owner()
+		if not owner:
+			push_warning("PlayerInputComponent has no owner!")
+			_action_created.emit(null)
+			return
+
+		# --- Bump to Attack Logic ---
+		# 1. 计算目标位置
+		if not game_manager:
+			push_error("GameManager not injected into PlayerInputComponent!")
+			_action_created.emit(null)
+			return
+			
+		var current_grid_pos = game_manager.get_grid_position(owner)
+		var target_grid_pos = current_grid_pos + direction
+		
+		# 2. 检查目标位置上的实体
+		var target_entity = game_manager.get_entity_at(target_grid_pos)
+		
+		# 3. 决策：攻击或移动
+		if target_entity:
+			_action_created.emit(AttackAction.new(owner, target_entity))
+		else:
+			_action_created.emit(MoveAction.new(owner, direction))

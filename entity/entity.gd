@@ -11,6 +11,8 @@ extends CharacterBody2D # 或者 Area2D, Node2D, etc.
 @onready var stats_component: StatsComponent = $StatsComponent
 # ... 其他组件
 
+# 依赖注入的事件总线
+var events_bus: Node
 
 func _ready():
 	if not entity_data:
@@ -29,8 +31,21 @@ func _ready():
 		health_component.health_depleted.connect(_on_health_depleted)
 
 
+# 由 TurnManager 调用
+func take_turn() -> BaseAction:
+	var action: BaseAction = null
+	if has_node("PlayerInputComponent"):
+		action = await get_node("PlayerInputComponent").get_action()
+	elif has_node("AIComponent"):
+		action = get_node("AIComponent").get_action()
+	
+	return action
+
+
 func _on_health_depleted():
 	# 实体死亡逻辑
 	print(self.name + " has been defeated.")
 	# 在实际游戏中，这里可能会播放动画、掉落物品，然后将对象返回到对象池
+	if events_bus:
+		events_bus.entity_died.emit(self) # 通知 TurnManager 等系统
 	queue_free()

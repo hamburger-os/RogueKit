@@ -12,15 +12,37 @@ func _init(p_entity: Node, p_target: Node):
 
 
 func execute():
-	# 在这里，我们将实现攻击逻辑。
-	# 这需要从攻击者的 StatsComponent 获取攻击力，
-	# 并对目标的 HealthComponent 调用 take_damage。
-	
-	if not is_instance_valid(target) or not target.has_node("HealthComponent"):
-		print(entity.name + " has no valid target to attack.")
+	# --- 1. 验证目标和组件 ---
+	if not is_instance_valid(target):
+		print(entity.name + " attack failed: target is invalid.")
 		return
 
-	# 示例逻辑:
-	var damage = 10 # 应该从 entity.get_node("StatsComponent").get_stat_value("attack") 获取
+	var attacker_stats: StatsComponent = entity.get_node_or_null("StatsComponent")
+	var target_stats: StatsComponent = target.get_node_or_null("StatsComponent")
+	var target_health: HealthComponent = target.get_node_or_null("HealthComponent")
+
+	if not target_health:
+		print(entity.name + " attack failed: target has no HealthComponent.")
+		return
+
+	# --- 2. 伤害计算 ---
+	# 默认值
+	var attack_power = 1 
+	var defense_power = 0
+
+	# 获取攻击力
+	if attacker_stats:
+		attack_power = attacker_stats.get_stat_value("strength") # 使用 "strength" 作为攻击属性
+	else:
+		push_warning(entity.name + " has no StatsComponent for attack calculation.")
+
+	# 获取防御力
+	if target_stats:
+		defense_power = target_stats.get_stat_value("defense") # 使用 "defense" 作为防御属性
+
+	# 计算最终伤害：确保伤害至少为1，防止无效攻击或治疗效果
+	var damage = max(1, attack_power - defense_power)
+
+	# --- 3. 应用伤害 ---
 	print(entity.name + " attacks " + target.name + " for " + str(damage) + " damage.")
-	target.get_node("HealthComponent").take_damage(damage)
+	target_health.take_damage(damage)

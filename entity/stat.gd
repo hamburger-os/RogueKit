@@ -25,14 +25,16 @@ func add_modifier(modifier):
 
 func remove_modifier(modifier):
 	var old_value = current_value
-	_modifiers.erase(modifier)
+	var index = _modifiers.find(modifier)
+	if index != -1:
+		_modifiers.remove_at(index)
 	emit_signal("value_changed", old_value, current_value)
 
 
 func _calculate_value() -> int:
 	var final_value = float(base_value)
 	var additive_bonus = 0.0
-	var multiplicative_bonus = 1.0
+	var multiplicative_bonus = 0.0
 
 	for modifier in _modifiers:
 		match modifier.type:
@@ -40,6 +42,6 @@ func _calculate_value() -> int:
 				additive_bonus += modifier.value
 			StatModifier.ModifierType.MULTIPLICATIVE:
 				multiplicative_bonus += modifier.value
-
-	final_value = (base_value + additive_bonus) * multiplicative_bonus
-	return int(final_value)
+	
+	final_value = (final_value + additive_bonus) * (1.0 + multiplicative_bonus)
+	return int(round(final_value))

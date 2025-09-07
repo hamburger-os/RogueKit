@@ -6,6 +6,19 @@ extends Node
 var stats: Dictionary = {} # Key: stat_name (String), Value: stat_resource (Stat)
 
 
+var _temp_modifiers: Array = [] # 存储 { "stat_name": String, "modifier": StatModifier, "timer": float }
+
+
+func _process(delta: float):
+	# 反向遍历以安全地移除元素
+	for i in range(_temp_modifiers.size() - 1, -1, -1):
+		var entry = _temp_modifiers[i]
+		entry.timer -= delta
+		if entry.timer <= 0:
+			remove_modifier(entry.stat_name, entry.modifier)
+			_temp_modifiers.pop_at(i)
+
+
 # 初始化组件
 func setup(stats_data: Dictionary):
 	for stat_name in stats_data:
@@ -36,6 +49,12 @@ func add_modifier(stat_name: String, modifier: StatModifier):
 	var stat = get_stat(stat_name)
 	if stat:
 		stat.add_modifier(modifier)
+		if modifier.duration > 0:
+			_temp_modifiers.append({
+				"stat_name": stat_name,
+				"modifier": modifier,
+				"timer": modifier.duration
+			})
 
 
 # 从一个属性移除修改器

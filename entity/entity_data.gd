@@ -7,6 +7,9 @@ extends Resource
 # 实体的名称
 @export var entity_name: String = "Entity"
 
+@export_group("Scene")
+@export var scene: PackedScene # 实体对应的场景文件
+
 # 生命值相关
 @export_group("Health")
 @export var max_health: int = 100

@@ -37,3 +37,8 @@ func setup(p_max_health: int):
 # 承受伤害
 func take_damage(amount: int):
 	self.current_health -= amount
+
+
+# 治疗
+func heal(amount: int):
+	self.current_health += amount

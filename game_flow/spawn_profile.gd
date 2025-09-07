@@ -3,12 +3,9 @@
 class_name SpawnProfile
 extends Resource
 
-# SpawnEntry 是一个内联类，用于定义生成配置中的单项。
-class SpawnEntry:
-	# 对实体数据资源的引用
-	var entity_data: EntityData
-	# 权重值，用于决定其在生成池中的相对概率
-	var weight: int
+# 显式预加载以帮助编译器在无头模式下找到类型
+const SpawnEntry = preload("res://lib/roguekit/game_flow/spawn_entry.gd")
 
 # 生成条目数组
+# 每个条目都是一个 SpawnEntry 资源，定义了要生成的实体及其权重。
 @export var spawn_entries: Array[SpawnEntry] = []

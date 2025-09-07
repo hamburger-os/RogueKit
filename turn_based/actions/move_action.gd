@@ -12,12 +12,37 @@ func _init(p_entity: Node, p_direction: Vector2i):
 
 
 func execute():
-	# 在这里，我们将移动实体。
-	# 这需要与地图数据进行交互，以检查目标位置是否可通行。
-	# 目前，我们只打印一条消息。
-	print(entity.name + " moves in direction " + str(direction))
+	var tile_size = GameManager.TILE_SIZE
+	if tile_size == 0:
+		push_error("TILE_SIZE in GameManager is not set or zero.")
+		return
+
+	# 1. 坐标计算：将像素坐标转换为网格坐标
+	# 假设实体的位置锚点在其中心，或者与网格对齐。使用 round 来处理浮点数不精确问题。
+	var current_grid_pos = Vector2i(
+		roundi(entity.global_position.x / tile_size),
+		roundi(entity.global_position.y / tile_size)
+	)
+	var target_grid_pos = current_grid_pos + direction
+
+	# 2. 碰撞检测（地形）
+	if GameManager.current_map_data:
+		var target_tile_type = GameManager.current_map_data.get_tile(target_grid_pos.x, target_grid_pos.y)
+		if target_tile_type != MapData.TileType.FLOOR:
+			print(entity.name + " move blocked by wall at " + str(target_grid_pos))
+			return # 撞墙，行动失败，不移动
+
+	# 3. 碰撞检测（其他实体）
+	var entity_at_target = GameManager.get_entity_at(target_grid_pos)
+	if entity_at_target:
+		# print(entity.name + " move blocked by entity " + entity_at_target.name)
+		# 移动被阻挡。P7.2中，PlayerInputComponent将利用这一点将移动转换为攻击。
+		# AI的MoveAction在这里会失败，防止AI穿过其他实体。
+		return
+
+	# 4. 执行移动
+	print(entity.name + " moves to " + str(target_grid_pos))
+	entity.global_position = Vector2(target_grid_pos) * tile_size
 	
-	# 一个简单的移动实现：
-	# var target_pos = entity.global_position + direction * TILE_SIZE
-	# if get_world().is_walkable(target_pos):
-	#   entity.global_position = target_pos
+	# 5. 更新实体位置注册表
+	GameManager.update_entity_position(entity, current_grid_pos, target_grid_pos)
