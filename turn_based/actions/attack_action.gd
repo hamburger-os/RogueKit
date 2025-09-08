@@ -5,8 +5,8 @@ extends BaseAction
 
 var target: Node
 
-func _init(p_entity: Node, p_target: Node):
-	super._init(p_entity)
+func _init(p_entity: Node, p_target: Node, p_game_manager: Node):
+	super._init(p_entity, p_game_manager)
 	self.target = p_target
 	self.energy_cost = 100 # 假设攻击消耗100能量
 

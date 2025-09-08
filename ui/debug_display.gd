@@ -8,7 +8,7 @@ var tracked_entities: Array[Node] = []
 
 func _ready():
 	# 使用一个组来查找所有实体
-	get_tree().get_nodes_in_group("entities", tracked_entities)
+	tracked_entities = get_tree().get_nodes_in_group("entities")
 	
 	# 如果没有实体在组里，尝试通过类型查找
 	if tracked_entities.is_empty():

@@ -26,7 +26,7 @@ var object_pool: ObjectPool
 # 当前激活的地图数据资源引用
 var current_map_data: MapData
 # 游戏中使用的瓦片大小（像素）。
-var tile_size: Vector2i = Vector2i.ONE * 64
+var tile_size: Vector2 # 初始化在 _init 或 _ready 中
 
 # --- 实体跟踪 ---
 var player_entity: Node # 对玩家实体的引用，方便AI查找目标
@@ -97,8 +97,8 @@ func get_grid_position(entity: Node) -> Vector2i:
 		push_error("tile_size in GameManager has a zero component, cannot calculate grid position.")
 		return Vector2i.ZERO
 	return Vector2i(
-		roundi(entity.global_position.x / tile_size.x),
-		roundi(entity.global_position.y / tile_size.y)
+		int(entity.global_position.x / tile_size.x),
+		int(entity.global_position.y / tile_size.y)
 	)
 
 # --- 游戏流程控制 ---

@@ -8,4 +8,4 @@ const WaveEvent = preload("res://lib/roguekit/game_flow/wave_event.gd")
 
 # 波次的时间线事件数组。
 # WaveManager 将按照时间戳顺序执行这些事件。
-@export var timeline_events: Array[WaveEvent] = []
+@export var timeline_events: Array[Resource] = []

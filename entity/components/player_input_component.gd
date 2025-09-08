@@ -61,6 +61,6 @@ func _process(_delta):
 		
 		# 3. 决策：攻击或移动
 		if target_entity:
-			_action_created.emit(AttackAction.new(owner, target_entity))
+			_action_created.emit(AttackAction.new(owner, target_entity, game_manager))
 		else:
-			_action_created.emit(MoveAction.new(owner, direction))
+			_action_created.emit(MoveAction.new(owner, direction, game_manager))

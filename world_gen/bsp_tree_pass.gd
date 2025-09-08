@@ -54,7 +54,8 @@ func _split_leaf(leaf: BSPLeaf, leaves: Array) -> bool:
 	elif leaf.height > leaf.width and float(leaf.height) / leaf.width >= 1.25:
 		split_horizontally = true
 
-	var max_size = (split_horizontally and leaf.height or leaf.width) - min_room_size
+	var selected_dimension = leaf.height if split_horizontally else leaf.width
+	var max_size = selected_dimension - min_room_size
 	if max_size <= min_room_size:
 		return false
 

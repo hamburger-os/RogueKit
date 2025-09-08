@@ -11,7 +11,7 @@ class LootEntry:
 	@export var max_quantity: int = 1
 
 # 掉落条目数组
-@export var loot_entries: Array[LootEntry] = []
+@export var loot_entries: Array = [] # Removed LootEntry type hint for export
 
 
 # 根据权重进行一次或多次加权随机抽选，并返回一个包含生成的 InventoryItem 对象的数组。

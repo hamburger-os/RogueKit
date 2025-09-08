@@ -8,4 +8,4 @@ enum EquipSlot {HEAD, CHEST, LEGS, WEAPON}
 @export var equip_slot: EquipSlot
 
 # 装备时应用的属性修改器
-@export var stat_modifiers: Array[StatModifier] = []
+@export var stat_modifiers: Array[Resource] = [] # Changed to Array[Resource]

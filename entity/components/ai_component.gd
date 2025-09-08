@@ -5,7 +5,12 @@ extends Node
 
 @export var behavior_profile: AIBehaviorProfile
 
+# 依赖注入
+
 var _last_action: BaseAction = null
+
+# 依赖注入
+var game_manager: Node
 
 # 由 Entity 的 take_turn() 调用
 func get_action() -> BaseAction:
