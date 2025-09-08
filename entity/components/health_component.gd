@@ -45,4 +45,5 @@ func take_damage(amount: int):
 
 # 治疗
 func heal(amount: int):
-	self.current_health += amount
+	if amount > 0:
+		self.current_health = min(max_health, self.current_health + amount)

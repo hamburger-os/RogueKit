@@ -23,7 +23,7 @@ func get_action() -> BaseAction:
 	_set_context(behavior_profile.root_node)
 	
 	# 执行行为树
-	behavior_profile.root_node.tick()
+	behavior_profile.root_node.tick(self)
 	
 	# 返回 tick() 过程中可能生成的 Action
 	var action_to_return = _last_action

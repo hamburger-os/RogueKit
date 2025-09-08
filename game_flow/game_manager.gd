@@ -9,15 +9,14 @@ enum GameState {MAIN_MENU, GAME_IN_PROGRESS, GAME_OVER}
 @export_group("Node Dependencies")
 @export var turn_manager: TurnManager
 @export var map_generator: MapGenerator
-@export var spawner: Spawner
 @export var map_builder: MapBuilder
 @export var entity_container: Node # 用于存放所有实体的节点
 @export var tilemap_node: TileMap   # 目标渲染的TileMap节点
+@export var wave_manager: WaveManager # 新增的 WaveManager 依赖
 
 # --- 配置资源 (在编辑器中设置) ---
 @export_group("Data Profiles")
 @export var map_profile: MapGenerationProfile
-@export var spawn_profile: SpawnProfile
 
 # --- 依赖注入的全局单例 ---
 var events_bus: Node
@@ -50,6 +49,10 @@ func set_dependencies(p_events_bus: Node, p_object_pool: ObjectPool):
 	# 连接全局事件
 	if events_bus:
 		events_bus.entity_died.connect(_on_entity_died)
+	
+	# 为 WaveManager 设置依赖 (如果它也需要)
+	if wave_manager and wave_manager.has_method("set_dependencies"):
+		wave_manager.set_dependencies(p_events_bus, p_object_pool)
 
 
 func _on_state_changed(state: GameState):
@@ -123,26 +126,20 @@ func start_new_game():
 	else:
 		push_warning("MapBuilder or TileMap node not configured in GameManager.")
 
-	# 2. 生成实体
-	if not spawner or not spawn_profile or not entity_container:
-		push_error("Spawner, SpawnProfile, or EntityContainer not configured in GameManager.")
+	# 2. 启动波次管理器来生成敌人
+	if not wave_manager:
+		push_error("WaveManager not configured in GameManager.")
 		return
-	
-	var spawned_actors = spawner.spawn_entities(current_map_data, spawn_profile, entity_container, tile_size)
-	
-	# 3. 注册实体到回合管理器
-	if not turn_manager:
-		push_error("TurnManager not configured in GameManager.")
-		return
-		
-	for actor in spawned_actors:
-		# 注入依赖
-		if actor.has_method("set_dependencies"):
-			actor.set_dependencies(events_bus, object_pool)
-		
-		turn_manager.register_actor(actor)
-		var grid_pos = get_grid_position(actor)
-		register_entity_at(actor, grid_pos)
+
+	# TODO: WaveManager 应该负责注册实体到 TurnManager 和 GameManager 的 entity_grid
+	# 目前，WaveManager 还没有直接返回生成的实体列表，这需要 WaveManager 内部进行注册。
+	# 或者，GameManager 可以监听 WaveManager 的生成信号来注册实体。
+	# 暂时，我们只启动 WaveManager，假设它会自行处理生成和注册。
+	wave_manager.start_wave() # 假设 WaveManager 有一个启动波次的方法
+
+	# 3. 注册玩家实体 (如果它不是由 WaveManager 生成的)
+	# 假设玩家实体在场景中是预先存在的，并且 PlayerInputComponent 会注册它自己。
+	# 或者在 GameState.GAME_IN_PROGRESS 状态下，TurnManager 会处理所有 actor 的注册。
 
 	self.current_state = GameState.GAME_IN_PROGRESS
 

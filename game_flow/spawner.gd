@@ -36,3 +36,11 @@ func _spawn_enemy():
 	enemy.global_position = random_spawn_point.global_position
 	
 	_active_enemies.append(enemy)
+
+func is_finished() -> bool:
+	# 如果没有设置最大存活敌人数量，则 Spawner 永远不会“完成”
+	if max_alive <= 0:
+		return false
+	
+	# 如果当前存活敌人数量达到最大值，并且没有新的敌人正在生成
+	return _active_enemies.size() >= max_alive and spawn_rate <= 0.0

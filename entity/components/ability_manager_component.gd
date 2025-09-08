@@ -12,7 +12,10 @@ func apply_modifier(modifier: AbilityModifierData):
 	# 检查标签兼容性
 	for required_tag in modifier.tags_required:
 		if not ability_core.tags.has(required_tag):
-			push_warning("Failed to apply modifier '%s'. Core is missing required tag: '%s'" % [modifier.modifier_name, required_tag])
+			push_warning("Failed to apply modifier '{modifier_name}'. Core is missing required tag: '{required_tag}'".format({
+				"modifier_name": modifier.modifier_name,
+				"required_tag": required_tag
+			}))
 			return
 	
 	applied_modifiers.append(modifier)

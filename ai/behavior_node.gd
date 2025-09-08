@@ -11,6 +11,6 @@ var context: Node
 
 # 核心方法，所有子类都必须重写此方法以实现其逻辑。
 # @return [Status]: 返回节点的执行结果。
-func tick() -> Status:
-	push_error("BehaviorNode.tick() is not implemented. Please override it in the child class.")
+func tick(context: Node) -> Status:
+	push_error("BehaviorNode.tick(context) is not implemented. Please override it in the child class.")
 	return Status.FAILURE

@@ -82,7 +82,7 @@
       * `modifier_name`: "连锁反应"
       * `description`: "击中敌人时弹射到附近的额外2个目标。"
       * `tags_required`: [ `projectile` ] (确保只能附加到投射物核心上)
-      * `effects_to_add_on_hit`: [ `ChainReactionEffect.tres` ]
+      * `effects_to_add`: [ `ChainReactionEffect.tres` ]
 
 #### 步骤 2：实现修饰符的独特逻辑 (`EffectData` 扩展)
 
