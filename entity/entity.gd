@@ -7,14 +7,22 @@ extends CharacterBody2D # 或者 Area2D, Node2D, etc.
 @export var entity_data: EntityData
 
 # 对子组件的引用
-@onready var health_component: HealthComponent = $HealthComponent
-@onready var stats_component: StatsComponent = $StatsComponent
+var health_component: HealthComponent
+var stats_component: StatsComponent
 # ... 其他组件
 
-# 依赖注入的事件总线
+# 依赖注入的管理器
 var events_bus: Node
+# 依赖注入的对象池，由 Spawner 在实体生成时设置
+var object_pool: ObjectPool
+var roguekit: Node
+
 
 func _ready():
+	# 使用 find_child 获取组件引用，更健壮
+	health_component = find_child("HealthComponent", true, false)
+	stats_component = find_child("StatsComponent", true, false)
+
 	if not entity_data:
 		push_warning("EntityData not assigned to " + self.name)
 		return
@@ -29,23 +37,70 @@ func _ready():
 	# 连接组件信号
 	if health_component:
 		health_component.health_depleted.connect(_on_health_depleted)
+		health_component.damaged.connect(_on_health_damaged)
+
+
+# 重置实体状态，由对象池调用
+func reset_state():
+	# 重置生命值
+	if health_component:
+		health_component.setup(entity_data.max_health)
+	
+	# TODO: 重置其他组件的状态，例如清除所有临时 StatModifier
+	
+	# 确保实体在场景树中可见和活动
+	# 注意：对象池已经处理了基础的 'visible', 'process', 'physics_process' 的开关
+	# 这里主要是重置游戏逻辑相关的状态
+	var collision_shape = find_child("CollisionShape2D", true, false)
+	if collision_shape:
+		collision_shape.disabled = false
 
 
 # 由 TurnManager 调用
 func take_turn() -> BaseAction:
 	var action: BaseAction = null
-	if has_node("PlayerInputComponent"):
-		action = await get_node("PlayerInputComponent").get_action()
-	elif has_node("AIComponent"):
-		action = get_node("AIComponent").get_action()
+	# 使用 find_child 提高健壮性
+	var player_input = find_child("PlayerInputComponent", true, false)
+	var ai_component = find_child("AIComponent", true, false)
+	
+	if player_input:
+		action = await player_input.get_action()
+	elif ai_component:
+		action = ai_component.get_action()
 	
 	return action
+
+
+func get_speed() -> float:
+	if stats_component:
+		return stats_component.get_stat_value(Roguekit.STATS.SPEED)
+	return 100.0 # 返回默认速度
 
 
 func _on_health_depleted():
 	# 实体死亡逻辑
 	print(self.name + " has been defeated.")
-	# 在实际游戏中，这里可能会播放动画、掉落物品，然后将对象返回到对象池
+	
 	if events_bus:
 		events_bus.entity_died.emit(self) # 通知 TurnManager 等系统
-	queue_free()
+	
+	# 禁用碰撞，防止已死亡的实体继续阻挡路径
+	var collision_shape = find_child("CollisionShape2D", true, false)
+	if collision_shape:
+		collision_shape.disabled = true
+		
+	# 将对象返回到对象池
+	if object_pool:
+		object_pool.return_instance(self)
+	else:
+		# 如果没有对象池（例如在测试场景中），则直接销毁
+		push_warning("No object pool injected for " + name + ". Freeing instance directly.")
+		queue_free()
+
+
+func _on_health_damaged(amount: int):
+	# 将本地的 'damaged' 事件传播到全局事件总线
+	# 注意：目前我们将 'source' 设为 null。
+	# 一个更完整的实现需要 AttackAction 或类似的东西来传递攻击者。
+	if events_bus:
+		events_bus.entity_took_damage.emit(self, amount, null)

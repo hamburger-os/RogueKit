@@ -7,6 +7,8 @@ extends Node
 signal health_depleted
 # 当生命值发生变化时发出
 signal health_changed(old_value, new_value)
+# 当组件的所有者受到伤害时发出
+signal damaged(amount: int)
 
 @export var max_health: int = 100
 
@@ -36,7 +38,9 @@ func setup(p_max_health: int):
 
 # 承受伤害
 func take_damage(amount: int):
-	self.current_health -= amount
+	if amount > 0:
+		self.current_health -= amount
+		emit_signal("damaged", amount)
 
 
 # 治疗

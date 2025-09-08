@@ -17,6 +17,12 @@ func _ready():
 
 # 由 Entity 的 take_turn() 调用
 func get_action() -> BaseAction:
+	# [FIX] 在无头模式下 (CI/测试), `Input` 事件永远不会发生，
+	# `await _action_created` 将导致永久挂起。
+	# 我们直接返回 `null` 来防止测试卡死。
+	if OS.has_feature("headless"):
+		return null
+
 	set_process(true)
 	var action = await _action_created
 	set_process(false)
