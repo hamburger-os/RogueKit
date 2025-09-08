@@ -9,13 +9,13 @@ extends EffectData
 # 要修改的目标属性名称 (例如 "strength", "defense")
 @export var stat_name: String = ""
 
-func execute(target: Node):
+func execute(context: EffectContext):
 	if not stat_modifier or stat_name.is_empty():
-		push_warning("ApplyStatModifierEffect a stat_modifier or stat_name.")
+		push_warning("ApplyStatModifierEffect is missing a stat_modifier or stat_name.")
 		return
 
-	var stats_component: StatsComponent = target.get_node_or_null("StatsComponent")
+	var stats_component: StatsComponent = context.target.get_node_or_null("StatsComponent")
 	if stats_component:
 		stats_component.add_modifier(stat_name, stat_modifier)
 	else:
-		push_warning(target.name + " has no StatsComponent to apply effect.")
+		push_warning(context.target.name + " has no StatsComponent to apply effect.")

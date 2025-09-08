@@ -9,12 +9,12 @@ extends EffectData
 # enum DamageType { PHYSICAL, FIRE, ICE }
 # @export var damage_type: DamageType = DamageType.PHYSICAL
 
-func execute(target: Node):
+func execute(context: EffectContext):
 	if damage_amount <= 0:
 		return
 
-	var health_component: HealthComponent = target.get_node_or_null("HealthComponent")
+	var health_component: HealthComponent = context.target.get_node_or_null("HealthComponent")
 	if health_component:
 		health_component.take_damage(damage_amount)
 	else:
-		push_warning(target.name + " has no HealthComponent to apply damage effect.")
+		push_warning(context.target.name + " has no HealthComponent to apply damage effect.")

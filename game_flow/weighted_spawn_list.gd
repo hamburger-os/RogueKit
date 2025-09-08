@@ -1,6 +1,6 @@
-# 生成配置文件
-# 这个数据资源用于定义一个关卡或区域中可以生成的实体类型及其概率。
-class_name SpawnProfile
+# 加权生成列表
+# 这个数据资源用于定义一个可以生成的实体类型及其概率的加权列表。
+class_name WeightedSpawnList
 extends Resource
 
 # 显式预加载以帮助编译器在无头模式下找到类型

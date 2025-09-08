@@ -6,6 +6,6 @@ extends Resource
 
 
 # 核心方法，所有子类都必须重写此方法以实现其效果逻辑。
-# @param target [Node]: 效果作用的目标节点。
-func execute(target: Node):
+# @param context [EffectContext]: 包含效果执行所需所有信息的上下文对象。
+func execute(context: EffectContext):
 	push_error("EffectData.execute() is not implemented. Please override it in the child class.")

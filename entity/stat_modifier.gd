@@ -9,14 +9,23 @@ enum ModifierType {
 	MULTIPLICATIVE, # 乘法 (最终值乘以 (1 + value))
 }
 
+enum DurationType {
+	PERMANENT, # 永久
+	REALTIME,  # 实时（秒）
+	TURNS      # 回合数
+}
+
 # 修改的数值
 var value: float
 # 修改的类型
 var type: ModifierType
-# 持续时间 (0 表示永久)
-var duration: float
 
-func _init(p_value: float, p_type: ModifierType, p_duration: float = 0.0):
+# 持续时间相关
+var duration: float = 0.0
+var duration_type: DurationType = DurationType.PERMANENT
+
+func _init(p_value: float, p_type: ModifierType, p_duration: float = 0.0, p_duration_type: DurationType = DurationType.PERMANENT):
 	self.value = p_value
 	self.type = p_type
 	self.duration = p_duration
+	self.duration_type = p_duration_type

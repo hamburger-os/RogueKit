@@ -47,14 +47,26 @@ func get_stat_value(stat_name: String) -> int:
 # 为一个属性添加修改器
 func add_modifier(stat_name: String, modifier: StatModifier):
 	var stat = get_stat(stat_name)
-	if stat:
-		stat.add_modifier(modifier)
-		if modifier.duration > 0:
-			_temp_modifiers.append({
-				"stat_name": stat_name,
-				"modifier": modifier,
-				"timer": modifier.duration
-			})
+	if not stat:
+		return
+
+	stat.add_modifier(modifier)
+
+	match modifier.duration_type:
+		StatModifier.DurationType.REALTIME:
+			if modifier.duration > 0:
+				_realtime_modifiers.append({
+					"stat_name": stat_name,
+					"modifier": modifier,
+					"timer": modifier.duration
+				})
+		StatModifier.DurationType.TURNS:
+			if modifier.duration > 0:
+				_turn_based_modifiers.append({
+					"stat_name": stat_name,
+					"modifier": modifier,
+					"turns_left": int(modifier.duration)
+				})
 
 
 # 从一个属性移除修改器
