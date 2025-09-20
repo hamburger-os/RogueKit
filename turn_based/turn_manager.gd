@@ -65,7 +65,7 @@ func _turn_loop():
 		var energy_cost = ACTION_ENERGY_THRESHOLD
 		if action:
 			energy_cost = action.energy_cost
-			action.execute()
+			action.execute(actor_to_act)
 		
 		actor_energy[actor_to_act] -= energy_cost
 

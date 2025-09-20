@@ -5,36 +5,35 @@ extends BaseAction
 
 var target: Node
 
-func _init(p_entity: Node, p_target: Node, p_game_manager: Node):
-	super._init(p_entity, p_game_manager)
+func _init(p_target: Node):
 	self.target = p_target
 	self.energy_cost = 100 # 假设攻击消耗100能量
 
 
-func execute():
+func execute(owner: Node):
 	# --- 1. 验证目标和组件 ---
 	if not is_instance_valid(target):
-		print(entity.name + " attack failed: target is invalid.")
+		print(owner.name + " attack failed: target is invalid.")
 		return
 
-	var attacker_stats: StatsComponent = entity.get_node_or_null("StatsComponent")
+	var attacker_stats: StatsComponent = owner.get_node_or_null("StatsComponent")
 	var target_stats: StatsComponent = target.get_node_or_null("StatsComponent")
 	var target_health: HealthComponent = target.get_node_or_null("HealthComponent")
 
 	if not target_health:
-		print(entity.name + " attack failed: target has no HealthComponent.")
+		print(owner.name + " attack failed: target has no HealthComponent.")
 		return
 
 	# --- 2. 伤害计算 ---
 	# 默认值
-	var attack_power = 1 
+	var attack_power = 1
 	var defense_power = 0
 
 	# 获取攻击力
 	if attacker_stats:
 		attack_power = attacker_stats.get_stat_value("strength") # 使用 "strength" 作为攻击属性
 	else:
-		push_warning(entity.name + " has no StatsComponent for attack calculation.")
+		push_warning(owner.name + " has no StatsComponent for attack calculation.")
 
 	# 获取防御力
 	if target_stats:
@@ -44,5 +43,5 @@ func execute():
 	var damage = max(1, attack_power - defense_power)
 
 	# --- 3. 应用伤害 ---
-	print(entity.name + " attacks " + target.name + " for " + str(damage) + " damage.")
+	print(owner.name + " attacks " + target.name + " for " + str(damage) + " damage.")
 	target_health.take_damage(damage)
