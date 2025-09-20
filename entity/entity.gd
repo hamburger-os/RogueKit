@@ -11,12 +11,6 @@ var health_component: HealthComponent
 var stats_component: StatsComponent
 # ... 其他组件
 
-# 依赖注入的管理器
-var events_bus: Node
-# 依赖注入的对象池，由 Spawner 在实体生成时设置
-var object_pool: ObjectPool
-var roguekit: Node
-
 
 func _ready():
 	# 使用 find_child 获取组件引用，更健壮
@@ -73,6 +67,7 @@ func take_turn() -> BaseAction:
 
 func get_speed() -> float:
 	if stats_component:
+		# 直接访问全局单例 Roguekit
 		return stats_component.get_stat_value(Roguekit.STATS.SPEED)
 	return 100.0 # 返回默认速度
 
@@ -81,8 +76,8 @@ func _on_health_depleted():
 	# 实体死亡逻辑
 	print(self.name + " has been defeated.")
 	
-	if events_bus:
-		events_bus.entity_died.emit(self) # 通知 TurnManager 等系统
+	# 直接访问全局事件总线
+	Events.entity_died.emit(self)
 	
 	# 禁用碰撞，防止已死亡的实体继续阻挡路径
 	var collision_shape = find_child("CollisionShape2D", true, false)
@@ -90,11 +85,12 @@ func _on_health_depleted():
 		collision_shape.disabled = true
 		
 	# 将对象返回到对象池
-	if object_pool:
-		object_pool.return_instance(self)
+	# 注意：检查 ObjectPool 是否存在，以处理非池化实例（例如在测试中）
+	if ObjectPool:
+		ObjectPool.return_instance(self)
 	else:
-		# 如果没有对象池（例如在测试场景中），则直接销毁
-		push_warning("No object pool injected for " + name + ". Freeing instance directly.")
+		# 如果没有对象池，则直接销毁
+		push_warning("No ObjectPool available for " + name + ". Freeing instance directly.")
 		queue_free()
 
 
@@ -102,5 +98,5 @@ func _on_health_damaged(amount: int):
 	# 将本地的 'damaged' 事件传播到全局事件总线
 	# 注意：目前我们将 'source' 设为 null。
 	# 一个更完整的实现需要 AttackAction 或类似的东西来传递攻击者。
-	if events_bus:
-		events_bus.entity_took_damage.emit(self, amount, null)
+	# 直接访问全局事件总线
+	Events.entity_took_damage.emit(self, amount, null)

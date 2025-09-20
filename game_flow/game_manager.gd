@@ -1,5 +1,6 @@
 # 游戏流程管理器 (Autoload Singleton)
 # 基于有限状态机 (FSM) 控制游戏的整体流程，如主菜单、游戏中、游戏结束等。
+class_name GameManager
 extends Node
 
 # 游戏状态枚举
@@ -18,10 +19,6 @@ enum GameState {MAIN_MENU, GAME_IN_PROGRESS, GAME_OVER}
 @export_group("Data Profiles")
 @export var map_profile: MapGenerationProfile
 
-# --- 依赖注入的全局单例 ---
-var events_bus: Node
-var object_pool: ObjectPool
-
 # --- 游戏世界数据 ---
 # 当前激活的地图数据资源引用
 var current_map_data: MapData
@@ -29,6 +26,9 @@ var current_map_data: MapData
 var tile_size: Vector2 # 初始化在 _init 或 _ready 中
 
 # --- 实体跟踪 ---
+signal entity_registered(entity)
+signal entity_removed_from_grid(entity)
+
 var player_entity: Node # 对玩家实体的引用，方便AI查找目标
 var entity_grid: Dictionary = {} # 存储实体位置, key: Vector2i, value: Entity Node
 
@@ -41,18 +41,19 @@ var current_state: GameState = GameState.MAIN_MENU:
 			_on_state_changed(new_state)
 
 
-# 依赖注入的 setter
-func set_dependencies(p_events_bus: Node, p_object_pool: ObjectPool):
-	self.events_bus = p_events_bus
-	self.object_pool = p_object_pool
+func _ready() -> void:
+	# 直接连接全局事件总线
+	Events.entity_died.connect(_on_entity_died)
 	
-	# 连接全局事件
-	if events_bus:
-		events_bus.entity_died.connect(_on_entity_died)
-	
-	# 为 WaveManager 设置依赖 (如果它也需要)
-	if wave_manager and wave_manager.has_method("set_dependencies"):
-		wave_manager.set_dependencies(p_events_bus, p_object_pool)
+	# 定义输入上下文
+	if InputContextManager:
+		var gameplay_actions = ["move_up", "move_down", "move_left", "move_right"]
+		InputContextManager.define_context("gameplay", gameplay_actions)
+		# 可以在这里定义其他上下文，如 "menu", "inventory"
+		# InputContextManager.define_context("menu", ["ui_accept", "ui_cancel"])
+		
+		# 游戏启动时禁用所有已定义的动作
+		InputContextManager.disable_all_at_boot()
 
 
 func _on_state_changed(state: GameState):
@@ -78,6 +79,8 @@ func register_entity_at(entity: Node, position: Vector2i):
 	# 通过检查组件来确定玩家实体，这比依赖顺序更可靠
 	if player_entity == null and entity.find_child("PlayerInputComponent", true, false):
 		player_entity = entity
+	
+	emit_signal("entity_registered", entity)
 
 func update_entity_position(entity: Node, old_position: Vector2i, new_position: Vector2i):
 	if entity_grid.get(old_position) == entity:
@@ -91,6 +94,7 @@ func remove_entity_from_grid(entity: Node):
 	var grid_pos = get_grid_position(entity)
 	if entity_grid.get(grid_pos) == entity:
 		entity_grid.erase(grid_pos)
+		emit_signal("entity_removed_from_grid", entity)
 		
 func get_grid_position(entity: Node) -> Vector2i:
 	if tile_size.x == 0 or tile_size.y == 0:
@@ -118,7 +122,7 @@ func start_new_game():
 		push_error("MapGenerator or MapProfile not configured in GameManager.")
 		return
 	var seed = randi() # 使用随机种子
-	self.current_map_data = map_generator.generate_map(80, 45, map_profile, seed) # 示例尺寸
+	self.current_map_data = map_generator.generate_map(map_profile, seed)
 
 	# 1b. 渲染视觉地图
 	if map_builder and tilemap_node:
@@ -141,6 +145,10 @@ func start_new_game():
 	# 假设玩家实体在场景中是预先存在的，并且 PlayerInputComponent 会注册它自己。
 	# 或者在 GameState.GAME_IN_PROGRESS 状态下，TurnManager 会处理所有 actor 的注册。
 
+	# 激活游戏中的输入上下文
+	if InputContextManager:
+		InputContextManager.activate_contexts(["gameplay"])
+		
 	self.current_state = GameState.GAME_IN_PROGRESS
 
 func end_game():
@@ -158,9 +166,9 @@ func _cleanup_previous_run():
 	player_entity = null
 
 	# 3. 从场景中移除并返还所有实体到对象池
-	if entity_container and object_pool:
+	if entity_container and ObjectPool:
 		for entity in entity_container.get_children():
-			object_pool.return_instance(entity) # return_instance 会自动处理 remove_child
+			ObjectPool.return_instance(entity) # return_instance 会自动处理 remove_child
 	elif entity_container:
 		# 如果没有对象池，则直接销毁
 		for entity in entity_container.get_children():

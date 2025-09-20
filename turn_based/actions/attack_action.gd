@@ -1,5 +1,5 @@
 # 攻击行动
-# 封装了实体攻击另一个实体的逻辑。
+# 封装了实体攻击另一个实体的意图。
 class_name AttackAction
 extends BaseAction
 
@@ -7,41 +7,24 @@ var target: Node
 
 func _init(p_target: Node):
 	self.target = p_target
-	self.energy_cost = 100 # 假设攻击消耗100能量
+	# 攻击通常消耗一个标准回合的能量
+	self.energy_cost = 100
 
 
+# 执行攻击逻辑
+# 委托给 owner 的 AbilityComponent 来执行默认的攻击能力。
 func execute(owner: Node):
-	# --- 1. 验证目标和组件 ---
-	if not is_instance_valid(target):
-		print(owner.name + " attack failed: target is invalid.")
+	if not is_instance_valid(owner) or not is_instance_valid(target):
 		return
 
-	var attacker_stats: StatsComponent = owner.get_node_or_null("StatsComponent")
-	var target_stats: StatsComponent = target.get_node_or_null("StatsComponent")
-	var target_health: HealthComponent = target.get_node_or_null("HealthComponent")
-
-	if not target_health:
-		print(owner.name + " attack failed: target has no HealthComponent.")
+	var ability_comp = owner.find_child("AbilityComponent", true, false)
+	if not ability_comp:
+		push_warning(owner.name + " tried to attack but has no AbilityComponent.")
 		return
-
-	# --- 2. 伤害计算 ---
-	# 默认值
-	var attack_power = 1
-	var defense_power = 0
-
-	# 获取攻击力
-	if attacker_stats:
-		attack_power = attacker_stats.get_stat_value("strength") # 使用 "strength" 作为攻击属性
-	else:
-		push_warning(owner.name + " has no StatsComponent for attack calculation.")
-
-	# 获取防御力
-	if target_stats:
-		defense_power = target_stats.get_stat_value("defense") # 使用 "defense" 作为防御属性
-
-	# 计算最终伤害：确保伤害至少为1，防止无效攻击或治疗效果
-	var damage = max(1, attack_power - defense_power)
-
-	# --- 3. 应用伤害 ---
-	print(owner.name + " attacks " + target.name + " for " + str(damage) + " damage.")
-	target_health.take_damage(damage)
+		
+	var attack_ability = ability_comp.get_primary_ability()
+	if not attack_ability:
+		push_warning(owner.name + " tried to attack but has no primary ability assigned.")
+		return
+		
+	ability_comp.execute_ability(attack_ability, target)

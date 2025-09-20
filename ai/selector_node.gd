@@ -6,9 +6,9 @@ extends BehaviorNode
 
 @export var children: Array[BehaviorNode] = []
 
-func tick(context: Node) -> Status:
+func tick(actor: Node, blackboard: Dictionary) -> Status:
 	for child in children:
-		var child_status = child.tick(context)
+		var child_status = child.tick(actor, blackboard)
 		if child_status != Status.FAILURE:
 			return child_status
 	

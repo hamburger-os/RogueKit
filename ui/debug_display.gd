@@ -7,19 +7,23 @@ extends CanvasLayer
 var tracked_entities: Array[Node] = []
 
 func _ready():
-	# 使用一个组来查找所有实体
-	tracked_entities = get_tree().get_nodes_in_group("entities")
+	# 连接到 GameManager 的信号来动态追踪实体
+	GameManager.entity_registered.connect(_on_entity_registered)
+	GameManager.entity_removed_from_grid.connect(_on_entity_removed)
 	
-	# 如果没有实体在组里，尝试通过类型查找
-	if tracked_entities.is_empty():
-		_find_entities_by_type(get_tree().root)
+	# 可能有一些实体在 DebugDisplay ready 之前就已经注册了，
+	# 所以这里可以考虑从 GameManager 获取一个当前的实体列表（如果 GameManager 提供的话）。
+	# 为了简化，我们假设 DebugDisplay 是最早准备好的节点之一。
 
-func _find_entities_by_type(node: Node):
-	if node is Entity and not node.is_in_group("entities"):
-		tracked_entities.append(node)
-	
-	for child in node.get_children():
-		_find_entities_by_type(child)
+
+func _on_entity_registered(entity: Node):
+	if not tracked_entities.has(entity):
+		tracked_entities.append(entity)
+
+
+func _on_entity_removed(entity: Node):
+	if tracked_entities.has(entity):
+		tracked_entities.erase(entity)
 
 
 func _process(_delta: float):

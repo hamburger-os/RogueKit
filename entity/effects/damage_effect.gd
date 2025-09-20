@@ -1,20 +1,35 @@
-# 效果：造成伤害
-# 对目标的 HealthComponent 施加一定量的伤害。
+# 伤害效果
+# 继承自 EffectData，实现对目标造成伤害的逻辑。
 class_name DamageEffect
 extends EffectData
 
-# 伤害值
-@export var damage_amount: int = 5
-# 伤害类型（未来可用于抗性计算）
+# 基础伤害值
+@export var base_damage: int = 10
+
+# 伤害类型 (未来可用于计算抗性等)
 # enum DamageType { PHYSICAL, FIRE, ICE }
 # @export var damage_type: DamageType = DamageType.PHYSICAL
 
+
+# 重写 execute 方法
 func execute(context: EffectContext):
-	if damage_amount <= 0:
+	if not context or not is_instance_valid(context.target):
 		return
 
-	var health_component: HealthComponent = context.target.get_node_or_null("HealthComponent")
-	if health_component:
-		health_component.take_damage(damage_amount)
-	else:
-		push_warning(context.target.name + " has no HealthComponent to apply damage effect.")
+	var target = context.target
+	var attacker = context.attacker
+	
+	var final_damage = base_damage
+	
+	# 从攻击者处获取属性加成
+	if is_instance_valid(attacker):
+		var stats_comp = attacker.find_child("StatsComponent", true, false)
+		if stats_comp and stats_comp.get_stat("damage_multiplier"):
+			final_damage *= stats_comp.get_stat_value("damage_multiplier")
+
+	var health_comp = target.find_child("HealthComponent", true, false)
+	if health_comp:
+		health_comp.take_damage(int(final_damage))
+		
+		# 将实际造成的伤害值写入上下文，供后续效果（如吸血）使用
+		context.metadata["damage_dealt"] = int(final_damage)

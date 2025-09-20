@@ -5,26 +5,31 @@ class_name MapGenerator
 extends Node
 
 # 生成一个新地图
-# @param width [int]: 地图宽度
-# @param height [int]: 地图高度
-# @param profile [MapGenerationProfile]: 定义生成流程的配置文件
+# @param profile [MapGenerationProfile]: 定义生成流程和尺寸的配置文件
 # @param seed_value [int]: 用于保证生成过程确定性的种子
 # @return [MapData]: 生成的抽象地图数据对象
-func generate_map(width: int, height: int, profile: MapGenerationProfile, seed_value: int) -> MapData:
+func generate_map(profile: MapGenerationProfile, seed_value: int) -> MapData:
+	if not profile:
+		push_error("MapGenerationProfile is null. Cannot generate map.")
+		return null
+		
 	var map_data = MapData.new()
-	map_data.create(width, height, MapData.TileType.WALL)
+	map_data.create(profile.map_size, MapData.TileType.WALL)
 	
 	var rng = RandomNumberGenerator.new()
 	rng.seed = seed_value
 	
-	if not profile or not profile.generation_passes:
-		push_warning("MapGenerationProfile is empty. Returning a solid wall map.")
+	if not profile.generation_passes:
+		push_warning("MapGenerationProfile has no generation passes. Returning a solid wall map.")
 		return map_data
 		
 	for gen_pass in profile.generation_passes:
-		# 将RNG实例传递给每个通道，以确保整个过程使用同一个种子
-		if "_rng" in gen_pass:
-			gen_pass._rng = rng
+		if not gen_pass:
+			push_warning("A null GenerationPass was found in the profile. Skipping.")
+			continue
+		
+		# 使用标准化的方法传递RNG实例
+		gen_pass.set_rng(rng)
 		map_data = gen_pass.generate(map_data)
 		
 	return map_data

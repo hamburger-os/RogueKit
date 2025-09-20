@@ -9,9 +9,6 @@ const AttackAction = preload("res://lib/roguekit/turn_based/actions/attack_actio
 
 signal _action_created(action)
 
-# 依赖注入
-var game_manager: Node
-
 func _ready():
 	set_process(false)
 
@@ -30,13 +27,13 @@ func get_action() -> BaseAction:
 
 func _process(_delta):
 	var direction = Vector2i.ZERO
-	if Input.is_action_just_pressed("ui_up"):
+	if Input.is_action_just_pressed("move_up"):
 		direction = Vector2i.UP
-	elif Input.is_action_just_pressed("ui_down"):
+	elif Input.is_action_just_pressed("move_down"):
 		direction = Vector2i.DOWN
-	elif Input.is_action_just_pressed("ui_left"):
+	elif Input.is_action_just_pressed("move_left"):
 		direction = Vector2i.LEFT
-	elif Input.is_action_just_pressed("ui_right"):
+	elif Input.is_action_just_pressed("move_right"):
 		direction = Vector2i.RIGHT
 
 	if direction != Vector2i.ZERO:
@@ -48,16 +45,11 @@ func _process(_delta):
 
 		# --- Bump to Attack Logic ---
 		# 1. 计算目标位置
-		if not game_manager:
-			push_error("GameManager not injected into PlayerInputComponent!")
-			_action_created.emit(null)
-			return
-			
-		var current_grid_pos = game_manager.get_grid_position(owner)
+		var current_grid_pos = GameManager.get_grid_position(owner)
 		var target_grid_pos = current_grid_pos + direction
 		
 		# 2. 检查目标位置上的实体
-		var target_entity = game_manager.get_entity_at(target_grid_pos)
+		var target_entity = GameManager.get_entity_at(target_grid_pos)
 		
 		# 3. 决策：攻击或移动
 		if target_entity:

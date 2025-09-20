@@ -1,31 +1,31 @@
 # 属性修改器
-# 一个轻量级的数据对象，定义了一个具体的属性修改。
+# 一个轻量级的数据资源，定义了一个具体的属性修改。
 class_name StatModifier
 extends Resource
 
 # 修改器的类型
 enum ModifierType {
-	ADDITIVE,       # 加法
-	MULTIPLICATIVE, # 乘法 (最终值乘以 (1 + value))
+	ADDITIVE,       # 加法: final_value += value
+	MULTIPLICATIVE, # 乘法: final_value *= (1.0 + value)
 }
 
+# 修改器持续时间的类型
 enum DurationType {
 	PERMANENT, # 永久
 	REALTIME,  # 实时（秒）
-	TURNS      # 回合数
+	TURNS,     # 回合制
 }
 
+# --- 修改器属性 ---
+
 # 修改的数值
-var value: float
-# 修改的类型
-var type: ModifierType
+@export var value: float = 0.0
 
-# 持续时间相关
-var duration: float = 0.0
-var duration_type: DurationType = DurationType.PERMANENT
+# 修改的类型 (加法或乘法)
+@export var type: ModifierType = ModifierType.ADDITIVE
 
-func _init(p_value: float = 0.0, p_type: ModifierType = ModifierType.ADDITIVE, p_duration: float = 0.0, p_duration_type: DurationType = DurationType.PERMANENT):
-	self.value = p_value
-	self.type = p_type
-	self.duration = p_duration
-	self.duration_type = p_duration_type
+# 持续时间类型
+@export var duration_type: DurationType = DurationType.PERMANENT
+
+# 持续时间 (秒或回合数)。如果 duration_type 是 PERMANENT，此值无效。
+@export var duration: float = 0.0

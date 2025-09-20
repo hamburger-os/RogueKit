@@ -4,6 +4,9 @@
 class_name MapGenerationProfile
 extends Resource
 
+# 定义地图的尺寸
+@export var map_size: Vector2i = Vector2i(80, 45)
+
 # 定义生成流程的 GenerationPass 数组
 # 开发者可以在编辑器中将不同的生成通道资源拖拽到这里。
 @export var generation_passes: Array[GenerationPass] = []

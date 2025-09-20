@@ -19,9 +19,9 @@ var rooms: Array = []
 
 
 # 初始化地图数据，用指定的瓦片类型填充整个地图
-func create(p_width: int, p_height: int, p_initial_tile: TileType):
-	self.width = p_width
-	self.height = p_height
+func create(p_size: Vector2i, p_initial_tile: TileType):
+	self.width = p_size.x
+	self.height = p_size.y
 	tiles.resize(width * height)
 	tiles.fill(p_initial_tile)
 
